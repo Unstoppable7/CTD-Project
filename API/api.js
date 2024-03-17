@@ -24,7 +24,7 @@ async function getAPI({url, headers, model}) {
   }
 }
 //https://api.example.com/data?page=2&limit=100&after=lastId
-export async function getArtworks(pagination) {
+export async function getArtworks(currentPage) {
   var limit = "limit=50";
   const fields_url = "fields=id,title,image_id,artist_display,date_display";
   const base_url = "https://api.artic.edu/api/v1/artworks";
@@ -33,7 +33,7 @@ export async function getArtworks(pagination) {
     "/search?query[exists][field]=image_id" +
     "&" +
     "page=" +
-    pagination +
+    currentPage +
     "&" +
     limit +
     "&" +

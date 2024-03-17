@@ -1,13 +1,20 @@
-import { loadData, currentData } from '../models/artwork.js';
-import { renderCard } from '../assets/dom.js';
-import { toRender, Model } from '../assets/util.js';
+import { loadDataArtworks} from '../models/artwork.js';
+import { renderPage } from '../assets/dom.js';
 
-const elementsPerPage = 9;
+export var currentFunctionToLoadData;
+export const elementsPerPage = 9;
+export const paginationLimit = 5;
 
-( async function test(){
+( async function main(){
+  var currentPage = 1;
 
-  await loadData(1,elementsPerPage);
+  currentFunctionToLoadData = loadDataArtworks;
 
-  renderCard(toRender(Model.Artwork, currentData,elementsPerPage));
-  console.log(currentData);
+  await renderPage(currentPage);
+  
 })();
+
+
+
+
+

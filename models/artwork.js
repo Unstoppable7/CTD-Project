@@ -1,14 +1,15 @@
 import { getArtworks, getImageByArtwork } from "../API/api.js";
 
-export var currentData;
+// export var currentDataArtworks;
 
-export async function loadData(pagination, dataLength) {
-  let artworks = await getArtworks(pagination);
+export async function loadDataArtworks(currentPage, dataLength) {
+  let artworks = await getArtworks(currentPage);
   let data = [];
+  let currentDataArtworks;
 
   for (const element of artworks.data) {
     let response = await getImageByArtwork(artworks, element.image_id);
-
+    
     if (!response) {
       continue;
     } else {
@@ -17,14 +18,18 @@ export async function loadData(pagination, dataLength) {
         img_url: response,
       });
     }
-
+    
     if (data.length == dataLength) {
       break;
     }
   }
-
-  currentData = {
+  
+  currentDataArtworks = {
     elements: data,
     pagination: artworks.pagination,
   };
+
+  console.log("current page: " + currentPage);
+  return currentDataArtworks;
+
 }
