@@ -59,3 +59,20 @@ export async function getImageByArtwork(artworks, image_id) {
     return response.url;
   }
 }
+
+export async function getArtwork(id){
+  const base_url = "https://api.artic.edu/api/v1/artworks/";
+  const fields_url = "fields=title,image_id,credit_line,description,place_of_origin,artist_titles,date_display,artist_ids";
+  const url =
+    base_url +
+    id +
+    "?" +
+    fields_url;
+
+  let response = await getAPI({url:url, headers:headers, model:Model.Artwork});
+  if(!response){
+    throw new Error("Error getArtworks(): " + response);
+  }else{
+    return response;
+  }
+}
