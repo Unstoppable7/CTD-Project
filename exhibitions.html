@@ -18,23 +18,31 @@
   </head>
   <body>
     <header>
-    </header>
-    <main>
+      <div class="container py-5">
+          <form class="d-flex" role="search">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success" type="submit">
+              Search
+            </button>
+          </form>
+      </div>
+  </header>
 
-      
-      <div class="py-5 bg-body-tertiary">
-        <button type="button" class="btn btn-outline-light" id="backToListBtn" onclick="goBack()">Back</button>
+    <main>
+      <div class="album py-5 bg-body-tertiary">
         <div class="container" id="container">
           
         </div>
+        <div class="container" id="pagination"></div>
       </div>
     </main>
+
     <footer>
     </footer>
-    <script>
-      function goBack() {
-        window.history.back();
-      }
-      </script>
   </body>
 </html>
