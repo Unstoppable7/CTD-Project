@@ -3,6 +3,8 @@ import {
   // currentFunctionToLoadData,
   elementsPerPage,
   paginationLimit,
+  goToDetails,
+  goToArtworks
 } from "./main.js";
 
 import { loadDataArtworks, loadDataArtwork } from "../models/artwork.js";
@@ -54,7 +56,7 @@ function renderCards(data) {
     button.classList.add("btn", "btn-sm", "btn-outline-secondary");
     button.textContent = "View";
     button.addEventListener("click", () => {
-      renderDetailsPage(item.id);
+      goToDetails(item.id);
     });
 
     let small = document.createElement("small");
@@ -139,7 +141,7 @@ function createPageButton(label, pageNumber, currentPage, totalPages) {
   }
   pageLink.addEventListener("click", async (event) => {
     event.preventDefault();
-    renderPage(pageNumber);
+    goToArtworks(pageNumber)
   });
 
   pageItem.appendChild(pageLink);
@@ -157,7 +159,7 @@ export async function renderPage(currentPage) {
   console.log(obj);
 }
 
-async function renderDetailsPage(id) {
+export async function renderDetailsPage(id) {
   let obj = await loadDataArtwork(id);
 
   renderDetails(toRenderDetail(obj));
@@ -224,9 +226,6 @@ function renderDetails(data) {
   description.classList.add("lead", "mb-4");
   description.innerHTML = data.description;
   div.appendChild(description);
-
-  let pagination = document.getElementById("pagination");
-  pagination.innerHTML = "";
 
   let container = document.getElementById("container");
   container.innerHTML = "" ;

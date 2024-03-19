@@ -20,24 +20,21 @@
     <header>
     </header>
     <main>
-      <section class="py-5 text-center container" >
-        <div class="row py-lg-5">
-          <div class="col-lg-6 col-md-8 mx-auto">
-            <h1 class="fw-light">Code The Dreams Pre-Work</h1>
-            <p class="lead text-body-secondary">
-              Something short and leading about the collection below—its
-              contents, the creator, etc. Make it short and sweet, but not too
-              short so folks don’t simply skip over it entirely.
-            </p>
-            <p>
-              <a href="/artworks.html?page=1" class="btn btn-primary my-2">Artworks</a>
-              <a href="#" class="btn btn-secondary my-2">Artist</a>
-            </p>
-          </div>
+
+      
+      <div class="py-5 bg-body-tertiary">
+        <button type="button" class="btn btn-outline-light" id="backToListBtn" onclick="goBack()">Back</button>
+        <div class="container" id="container">
+          
         </div>
-      </section>
+      </div>
     </main>
     <footer>
     </footer>
+    <script>
+      function goBack() {
+        window.history.back();
+      }
+      </script>
   </body>
 </html>
