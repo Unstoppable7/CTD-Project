@@ -3,6 +3,7 @@ import {
   goToArtworkDetails,
   goToExhibitions,
   goToExhibitionDetails,
+  goToArtists
 } from "./controller.js";
 
 import {
@@ -12,9 +13,20 @@ import {
 import {
   elementsPerPage as artworkElementsPerPage,
   paginationLimit as artWorkPaginationLimit,
+  
 } from "../models/artwork.js";
 
-import { loadDataCardListPage, loadDataCardDetails, loadDataCardListSection } from "../dataManagement.js";
+import {
+  elementsPerPage as artistElementsPerPage,
+  paginationLimit as artistPaginationLimit,
+  
+} from "../models/artist.js";
+
+import {
+  loadDataCardListPage,
+  loadDataCardDetails,
+  loadDataCardListSection,
+} from "../dataManagement.js";
 
 import {
   getArtworks,
@@ -22,6 +34,7 @@ import {
   getExhibitions,
   getExhibition,
   getArtworksByExhibition,
+  getArtists,
 } from "../API/api.js";
 
 function renderArtworkCards(data) {
@@ -450,7 +463,9 @@ function renderExhibitionCardDetails(obj) {
 }
 
 export async function renderArtworkCardListByExhibition(artwork_ids) {
-  let obj = await loadDataCardListSection(await getArtworksByExhibition(artwork_ids));
+  let obj = await loadDataCardListSection(
+    await getArtworksByExhibition(artwork_ids)
+  );
   console.log(obj);
   renderArtworkCardsByExhibition(obj);
 }
@@ -522,5 +537,91 @@ function renderArtworkCardsByExhibition(data) {
   });
 
   let container = document.getElementById("container");
+  container.appendChild(html);
+}
+
+export async function renderArtistListPage(currentPage) {
+  let obj = await getArtists(currentPage, artistElementsPerPage);
+
+  const totalPages = obj.pagination.total_pages;
+
+  renderArtistList(obj);
+
+  renderPagination(
+    totalPages,
+    currentPage,
+    goToArtists,
+    artistPaginationLimit
+  );
+}
+
+function renderArtistList(obj) {
+  let html = document.createElement("div");
+  html.classList.add(
+    "row",
+    "row-cols-1",
+    "row-cols-sm-2",
+    "row-cols-md-3",
+    "g-3"
+  );
+
+  obj.data.forEach((item) => {
+    let col = document.createElement("div");
+    col.classList.add("col");
+
+    let card = document.createElement("div");
+    card.classList.add("card", "shadow-sm");
+
+    let cardBody = document.createElement("div");
+    cardBody.classList.add("card-body");
+
+    let title = document.createElement("h5");
+    title.classList.add("card-title");
+    title.textContent = item.title;
+
+    let subtitle = document.createElement("h6");
+    subtitle.classList.add("card-subtitle", "mb-2", "text-body-secondary");
+    if(item.death_date){
+      subtitle.textContent = item.birth_date + " - " + item.death_date;
+    }else{
+      subtitle.textContent = item.birth_date;
+    }
+
+    let divContainer = document.createElement("div");
+    divContainer.classList.add(
+      "d-flex",
+      "justify-content-between",
+      "align-items-center"
+    );
+
+    let buttonGroup = document.createElement("div");
+    buttonGroup.classList.add("btn-group");
+
+    let button = document.createElement("button");
+    button.type = "button";
+    button.classList.add("btn", "btn-sm", "btn-outline-secondary");
+    button.textContent = "View";
+    button.addEventListener("click", () => {
+      // goToArtworkDetails(item.data.id);
+      //TODO
+    });
+
+    let small = document.createElement("small");
+    small.classList.add("text-body-secondary");
+    small.textContent = `Updated at ${item.updated_at}`;
+
+    buttonGroup.appendChild(button);
+    divContainer.appendChild(buttonGroup);
+    divContainer.appendChild(small);
+    cardBody.appendChild(title);
+    cardBody.appendChild(subtitle);
+    cardBody.appendChild(divContainer);
+    card.appendChild(cardBody);
+    col.appendChild(card);
+    html.appendChild(col);
+  });
+
+  let container = document.getElementById("container");
+  container.innerHTML = "";
   container.appendChild(html);
 }

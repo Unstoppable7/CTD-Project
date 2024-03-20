@@ -1,4 +1,10 @@
-import { renderArtworkCardListPage, renderArtworkCardDetailsPage, renderExhibitionCardListPage, renderExhibitionCardDetailsPage } from "./dom.js";
+import {
+  renderArtworkCardListPage,
+  renderArtworkCardDetailsPage,
+  renderExhibitionCardListPage,
+  renderExhibitionCardDetailsPage,
+  renderArtistListPage
+} from "./dom.js";
 
 export function initControllerListener() {
   document.addEventListener("DOMContentLoaded", async function () {
@@ -11,19 +17,26 @@ export function initControllerListener() {
       case "/":
         break;
       case "/artworks.html":
-        if(currentPage){
+        if (currentPage) {
           await showArtworkCardListPage(currentPage);
-        }else if(elementId){
+        } else if (elementId) {
           await showArtworkDetails(elementId);
         }
         break;
       case "/exhibitions.html":
-        if(currentPage){
+        if (currentPage) {
           await showExhibitionCardListPage(currentPage);
-        }else if(elementId){
+        } else if (elementId) {
           await showExhibitionDetails(elementId);
         }
-        
+        break;
+
+      case "/artists.html":
+        if (currentPage) {
+          await showArtistCardListPage(currentPage);
+        // } else if (elementId) {
+        //   await elementId;
+        }
         break;
     }
   });
@@ -45,6 +58,14 @@ async function showExhibitionDetails(elementId) {
   await renderExhibitionCardDetailsPage(elementId);
 }
 
+async function showArtistCardListPage(currentPage) {
+  await renderArtistListPage(currentPage);
+}
+
+// async function showArtistDetails(elementId) {
+//   await renderExhibitionCardDetailsPage(elementId);
+// }
+
 export function goToArtworks(currentPage) {
   window.location.href = `/artworks.html?page=${currentPage}`;
 }
@@ -59,4 +80,8 @@ export function goToExhibitions(currentPage) {
 
 export function goToExhibitionDetails(elementId) {
   window.location.href = `/exhibitions.html?id=${elementId}`;
+}
+
+export function goToArtists(currentPage) {
+  window.location.href = `/artists.html?page=${currentPage}`;
 }
