@@ -3,7 +3,8 @@ import {
   renderArtworkCardDetailsPage,
   renderExhibitionCardListPage,
   renderExhibitionCardDetailsPage,
-  renderArtistListPage
+  renderArtistListPage,
+  renderArtistDetailsPage
 } from "./dom.js";
 
 export function initControllerListener() {
@@ -34,8 +35,8 @@ export function initControllerListener() {
       case "/artists.html":
         if (currentPage) {
           await showArtistCardListPage(currentPage);
-        // } else if (elementId) {
-        //   await elementId;
+        } else if (elementId) {
+          await showArtistDetails(elementId);
         }
         break;
     }
@@ -62,9 +63,9 @@ async function showArtistCardListPage(currentPage) {
   await renderArtistListPage(currentPage);
 }
 
-// async function showArtistDetails(elementId) {
-//   await renderExhibitionCardDetailsPage(elementId);
-// }
+async function showArtistDetails(elementId) {
+  await renderArtistDetailsPage(elementId);
+}
 
 export function goToArtworks(currentPage) {
   window.location.href = `/artworks.html?page=${currentPage}`;
@@ -84,4 +85,8 @@ export function goToExhibitionDetails(elementId) {
 
 export function goToArtists(currentPage) {
   window.location.href = `/artists.html?page=${currentPage}`;
+}
+
+export function goToArtistDetails(elementId) {
+  window.location.href = `/artists.html?id=${elementId}`;
 }

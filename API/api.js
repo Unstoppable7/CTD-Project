@@ -149,7 +149,8 @@ export async function getArtworksByExhibition(artwork_ids) {
 
 export async function getArtists(currentPage, elementsPerPage) {
   var limit = "limit=" + elementsPerPage;
-  const fields_url = "fields=id,title,birth_date,death_date,updated_at,is_artist";
+  const fields_url =
+    "fields=id,title,birth_date,death_date,updated_at,is_artist";
   const base_url = "https://api.artic.edu/api/v1/agents";
   const url =
     base_url +
@@ -174,19 +175,41 @@ export async function getArtists(currentPage, elementsPerPage) {
   }
 }
 
-export async function getAr(elementId) {
-  const base_url = "https://api.artic.edu/api/v1/exhibitions/";
-  const fields_url =
-    "fields=title,image_id,short_description,gallery_title,artwork_ids,artwork_titles";
+export async function getArtist(elementId) {
+  const base_url = "https://api.artic.edu/api/v1/agents/";
+  const fields_url = "fields=id,title,birth_date,death_date,description";
   const url = base_url + elementId + "?" + fields_url;
 
   let response = await getAPI({
     url: url,
     headers: headers,
-    model: Entity.Exhibition,
+    model: Entity.Artist,
   });
   if (!response) {
-    throw new Error("Error getExhibition(): " + response);
+    throw new Error("Error getArtist(): " + response);
+  } else {
+    return response;
+  }
+}
+
+export async function getArtworksByArtist(artist_id) {
+  const base_url = "https://api.artic.edu/api/v1/artworks";
+  const fields_url =
+    "fields=id,title,image_id,artist_display,date_display,artist_ids";
+  const url =
+    base_url +
+    "/search?query[match][artist_id]=" +
+    artist_id +
+    "&" +
+    fields_url;
+
+  let response = await getAPI({
+    url: url,
+    headers: headers,
+    model: Entity.Artwork,
+  });
+  if (!response) {
+    throw new Error("Error getArtworksByExhibition(): " + response);
   } else {
     return response;
   }

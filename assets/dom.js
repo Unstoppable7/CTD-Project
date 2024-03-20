@@ -3,7 +3,8 @@ import {
   goToArtworkDetails,
   goToExhibitions,
   goToExhibitionDetails,
-  goToArtists
+  goToArtists,
+  goToArtistDetails,
 } from "./controller.js";
 
 import {
@@ -13,13 +14,11 @@ import {
 import {
   elementsPerPage as artworkElementsPerPage,
   paginationLimit as artWorkPaginationLimit,
-  
 } from "../models/artwork.js";
 
 import {
   elementsPerPage as artistElementsPerPage,
   paginationLimit as artistPaginationLimit,
-  
 } from "../models/artist.js";
 
 import {
@@ -35,6 +34,8 @@ import {
   getExhibition,
   getArtworksByExhibition,
   getArtists,
+  getArtist,
+  getArtworksByArtist
 } from "../API/api.js";
 
 function renderArtworkCards(data) {
@@ -373,8 +374,6 @@ function renderExhibitionCards(data) {
 export async function renderExhibitionCardDetailsPage(elementId) {
   let obj = await loadDataCardDetails(await getExhibition(elementId));
   renderExhibitionCardDetails(obj);
-
-  console.log(obj);
 }
 
 function renderExhibitionCardDetails(obj) {
@@ -412,30 +411,6 @@ function renderExhibitionCardDetails(obj) {
   meta.innerHTML = obj.data.gallery_title + " Gallery";
   mainDiv.appendChild(meta);
 
-  // const arrayDataLinks = obj.data.artwork_titles.map((value) => {
-  //   const link = document.createElement("a");
-  //   link.addEventListener("click", function(event) {
-  //     event.preventDefault();
-  //     miFuncion();
-  //   });
-  //   link.textContent = value;
-  //   return link;
-  // });
-
-  // arrayDataLinks.forEach((link) => {
-  //   document.body.appendChild(link);
-  // });
-
-  // const arrayDataLinks = obj.data.artwork_titles.map(
-  //   (value) => `<a href="">${value}</a>`
-  // );
-
-  // const arrayDataString = arrayDataLinks.join(", ");
-
-  // const shortText = document.createElement("p");
-  // shortText.classList.add("details-meta");
-  // shortText.innerHTML = arrayDataString;
-  // div.appendChild(shortText);
   renderArtworkCardListByExhibition(obj.data.artwork_ids);
   const description = document.createElement("p");
   description.classList.add("lead", "mb-4");
@@ -458,7 +433,6 @@ function renderExhibitionCardDetails(obj) {
   container.appendChild(backButton);
   container.appendChild(mainDiv);
 
-  //TODO logic if exists artwors
   container.appendChild(artworksDiv);
 }
 
@@ -466,7 +440,6 @@ export async function renderArtworkCardListByExhibition(artwork_ids) {
   let obj = await loadDataCardListSection(
     await getArtworksByExhibition(artwork_ids)
   );
-  console.log(obj);
   renderArtworkCardsByExhibition(obj);
 }
 
@@ -547,12 +520,7 @@ export async function renderArtistListPage(currentPage) {
 
   renderArtistList(obj);
 
-  renderPagination(
-    totalPages,
-    currentPage,
-    goToArtists,
-    artistPaginationLimit
-  );
+  renderPagination(totalPages, currentPage, goToArtists, artistPaginationLimit);
 }
 
 function renderArtistList(obj) {
@@ -581,9 +549,9 @@ function renderArtistList(obj) {
 
     let subtitle = document.createElement("h6");
     subtitle.classList.add("card-subtitle", "mb-2", "text-body-secondary");
-    if(item.death_date){
+    if (item.death_date) {
       subtitle.textContent = item.birth_date + " - " + item.death_date;
-    }else{
+    } else {
       subtitle.textContent = item.birth_date;
     }
 
@@ -602,8 +570,7 @@ function renderArtistList(obj) {
     button.classList.add("btn", "btn-sm", "btn-outline-secondary");
     button.textContent = "View";
     button.addEventListener("click", () => {
-      // goToArtworkDetails(item.data.id);
-      //TODO
+      goToArtistDetails(item.id);
     });
 
     let small = document.createElement("small");
@@ -623,5 +590,145 @@ function renderArtistList(obj) {
 
   let container = document.getElementById("container");
   container.innerHTML = "";
+  container.appendChild(html);
+}
+
+export async function renderArtistDetailsPage(elementId) {
+  let obj = await getArtist(elementId);
+  renderArtistDetails(obj);
+}
+
+function renderArtistDetails(obj) {
+  const backButton = document.createElement("button");
+  backButton.type = "button";
+  backButton.classList.add("btn", "btn-outline-light");
+  backButton.id = "backToListBtn";
+  backButton.textContent = "Back";
+
+  backButton.addEventListener("click", function () {
+    window.history.back();
+  });
+
+  const mainDiv = document.createElement("div");
+  mainDiv.classList.add("pt-5", "my-5", "text-center");
+
+  const innerContainer = document.createElement("div");
+  innerContainer.classList.add("container", "px-5");
+  mainDiv.appendChild(innerContainer);
+
+  const title = document.createElement("h1");
+  title.classList.add("display-4", "fw-bold", "text-body-emphasis");
+  title.textContent = obj.data.title;
+  mainDiv.appendChild(title);
+
+  const meta = document.createElement("p");
+  meta.classList.add("details-meta");
+  if (obj.data.death_date) {
+    meta.innerHTML = obj.data.birth_date + " - " + obj.data.death_date;
+  } else {
+    meta.innerHTML = obj.data.birth_date;
+  }
+  mainDiv.appendChild(meta);
+  //TODO
+  // renderArtworkCardListByExhibition(obj.data.artwork_ids);
+  renderArtworkCardListByArtist(obj.data.id);
+  const description = document.createElement("p");
+  description.classList.add("lead", "mb-4");
+  description.innerHTML = obj.data.description;
+  mainDiv.appendChild(description);
+
+  const divider = document.createElement("hr");
+  mainDiv.appendChild(divider);
+
+  const artworksDiv = document.createElement("div");
+  // artworksDiv.classList.add("pt-5", "my-5",);
+
+  const artworksTitle = document.createElement("h4");
+  artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
+  artworksTitle.textContent = "Artworks";
+  artworksDiv.appendChild(artworksTitle);
+
+  let container = document.getElementById("container");
+  container.innerHTML = "";
+  container.appendChild(backButton);
+  container.appendChild(mainDiv);
+
+  container.appendChild(artworksDiv);
+}
+
+export async function renderArtworkCardListByArtist(artist_id) {
+  let obj = await loadDataCardListSection(
+    await getArtworksByArtist(artist_id)
+  );
+  renderArtworkCardsByArtist(obj);
+}
+
+function renderArtworkCardsByArtist(data) {
+  let html = document.createElement("div");
+  html.classList.add(
+    "row",
+    "row-cols-1",
+    "row-cols-sm-2",
+    "row-cols-md-3",
+    "g-3"
+  );
+
+  data.forEach((item) => {
+    let col = document.createElement("div");
+    col.classList.add("col");
+
+    let card = document.createElement("div");
+    card.classList.add("card", "shadow-sm");
+
+    let img = document.createElement("img");
+    img.classList.add("card-img-top", "img-fluid");
+    img.src = item.img_url;
+
+    let cardBody = document.createElement("div");
+    cardBody.classList.add("card-body");
+
+    let title = document.createElement("h5");
+    title.classList.add("card-title");
+    title.textContent = item.data.title;
+
+    let subtitle = document.createElement("h6");
+    subtitle.classList.add("card-subtitle", "mb-2", "text-body-secondary");
+    subtitle.textContent = item.data.artist_display;
+
+    let divContainer = document.createElement("div");
+    divContainer.classList.add(
+      "d-flex",
+      "justify-content-between",
+      "align-items-center"
+    );
+
+    let buttonGroup = document.createElement("div");
+    buttonGroup.classList.add("btn-group");
+
+    let button = document.createElement("button");
+    button.type = "button";
+    button.classList.add("btn", "btn-sm", "btn-outline-secondary");
+    button.textContent = "View";
+    button.addEventListener("click", () => {
+      goToArtworkDetails(item.data.id);
+    });
+
+    let small = document.createElement("small");
+    small.classList.add("text-body-secondary");
+    small.textContent = `Created in ${item.data.date_display}`;
+
+    buttonGroup.appendChild(button);
+    divContainer.appendChild(buttonGroup);
+    divContainer.appendChild(small);
+    cardBody.appendChild(title);
+    cardBody.appendChild(subtitle);
+    cardBody.appendChild(divContainer);
+    card.appendChild(img);
+    card.appendChild(cardBody);
+    col.appendChild(card);
+    html.appendChild(col);
+  });
+
+  let container = document.getElementById("container");
   container.appendChild(html);
 }
