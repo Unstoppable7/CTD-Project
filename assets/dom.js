@@ -35,7 +35,7 @@ import {
   getArtworksByExhibition,
   getArtists,
   getArtist,
-  getArtworksByArtist
+  getArtworksByArtist,
 } from "../API/api.js";
 
 function renderArtworkCards(data) {
@@ -251,19 +251,22 @@ function renderArtworkCardDetails(obj) {
 
   const meta = document.createElement("p");
   meta.classList.add("details-meta");
-
-  const arrayDataLinks = obj.data.artist_titles.map(
-    (value) => `<a href="#">${value}</a>`
-  );
-
-  const arrayDataString = arrayDataLinks.join(", ");
-
   meta.innerHTML =
     obj.data.place_of_origin +
     " - " +
     obj.data.date_display +
-    " by " +
-    arrayDataString;
+    " by";
+
+  for (let i = 0; i < obj.data.artist_ids.length; i++) {
+    let button = document.createElement("button");
+    button.type = "button";
+    button.classList.add("btn", "btn-link");
+    button.textContent = obj.data.artist_titles[i];
+    button.addEventListener("click", () => {
+      goToArtistDetails(obj.data.artist_ids[i]);
+    });
+    meta.appendChild(button);
+  }
 
   div.appendChild(meta);
 
@@ -657,9 +660,7 @@ function renderArtistDetails(obj) {
 }
 
 export async function renderArtworkCardListByArtist(artist_id) {
-  let obj = await loadDataCardListSection(
-    await getArtworksByArtist(artist_id)
-  );
+  let obj = await loadDataCardListSection(await getArtworksByArtist(artist_id));
   renderArtworkCardsByArtist(obj);
 }
 
