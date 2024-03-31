@@ -43,6 +43,8 @@ import {
 } from "../API/api.js";
 
 const NO_RESULTS_TEXT = "No results found";
+const ARTWORKS_BY_EXHIBITION_CONTAINER_ID = "container-artworksByExhibition";
+const ARTWORKS_BY_ARTIST_CONTAINER_ID = "container-artworksByArtist";
 
 function renderArtworkCards(data) {
   let html = document.createElement("div");
@@ -202,7 +204,7 @@ function createPaginationButton(
   return pageItem;
 }
 
-export function renderSearchCardList(
+export function renderInputSearch(
   callback,
   searchContainerElementId,
   formElementId,
@@ -251,12 +253,14 @@ export async function renderArtworkCardListPage(
   formElementId,
   inputElementId
 ) {
-  renderSearchCardList(
+  renderInputSearch(
     callback,
     searchContainerElementId,
     formElementId,
     inputElementId
   );
+
+  renderSpinnerLoading();
 
   let obj = await loadDataCardListPage(
     query
@@ -268,30 +272,29 @@ export async function renderArtworkCardListPage(
 
   const totalPages = obj.pagination.total_pages;
 
-  if (totalPages > 0) {
-    renderArtworkCards(obj);
+  renderArtworkCards(obj);
 
-    renderPagination(
-      totalPages,
-      currentPage,
-      query ? nextPaginationSearch : goToArtworks,
-      artWorkPaginationLimit
-    );
-  } else {
-    renderBackButton();
-    renderNoResultsMessage(NO_RESULTS_TEXT);
-  }
+  renderPagination(
+    totalPages,
+    currentPage,
+    query ? nextPaginationSearch : goToArtworks,
+    artWorkPaginationLimit
+  );
 }
 
 export async function renderArtworkCardDetailsPage(elementId) {
+
+  renderSpinnerLoading();
+
   renderArtworkCardDetails(
     await loadDataCardDetails(await getArtwork(elementId))
   );
 }
 
 function renderArtworkCardDetails(obj) {
+
   renderBackButton();
-  
+
   const div = document.createElement("div");
   div.classList.add("pt-5", "my-5", "text-center");
 
@@ -351,12 +354,14 @@ export async function renderExhibitionCardListPage(
   formElementId,
   inputElementId
 ) {
-  renderSearchCardList(
+  renderInputSearch(
     callback,
     searchContainerElementId,
     formElementId,
     inputElementId
   );
+  
+  renderSpinnerLoading();
 
   let obj = await loadDataCardListPage(
     query
@@ -453,8 +458,12 @@ function renderExhibitionCards(data) {
 }
 
 export async function renderExhibitionCardDetailsPage(elementId) {
+
+  renderSpinnerLoading();
+
   let obj = await loadDataCardDetails(await getExhibition(elementId));
   renderExhibitionCardDetails(obj);
+  renderArtworkCardListByExhibition(obj.data.artwork_ids);
 }
 
 function renderExhibitionCardDetails(obj) {
@@ -472,40 +481,42 @@ function renderExhibitionCardDetails(obj) {
   image.alt = "Example image";
   image.loading = "lazy";
   innerContainer.appendChild(image);
-
+  
   const title = document.createElement("h1");
   title.classList.add("display-4", "fw-bold", "text-body-emphasis");
   title.textContent = obj.data.title;
   mainDiv.appendChild(title);
-
+  
   const meta = document.createElement("p");
   meta.classList.add("details-meta");
   meta.innerHTML = obj.data.gallery_title + " Gallery";
   mainDiv.appendChild(meta);
-
-  renderArtworkCardListByExhibition(obj.data.artwork_ids);
+  
   const description = document.createElement("p");
   description.classList.add("lead", "mb-4");
   description.innerHTML = obj.data.short_description;
   mainDiv.appendChild(description);
-
+  
   const divider = document.createElement("hr");
   mainDiv.appendChild(divider);
-
+  
   const artworksDiv = document.createElement("div");
-
+  
   const artworksTitle = document.createElement("h4");
   artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
   artworksTitle.textContent = "Artworks";
+  artworksDiv.id = ARTWORKS_BY_EXHIBITION_CONTAINER_ID;
   artworksDiv.appendChild(artworksTitle);
-
+  
   let container = document.getElementById("container");
   container.appendChild(mainDiv);
-
   container.appendChild(artworksDiv);
 }
 
 export async function renderArtworkCardListByExhibition(artwork_ids) {
+
+  renderSpinnerLoading(ARTWORKS_BY_EXHIBITION_CONTAINER_ID);
+
   let obj = await loadDataCardListSection(
     await getArtworksByExhibition(artwork_ids)
   );
@@ -578,7 +589,8 @@ function renderArtworkCardsByExhibition(data) {
     html.appendChild(col);
   });
 
-  let container = document.getElementById("container");
+  let container = document.getElementById(ARTWORKS_BY_EXHIBITION_CONTAINER_ID);
+  container.innerHTML = "";
   container.appendChild(html);
 }
 
@@ -590,12 +602,14 @@ export async function renderArtistListPage(
   formElementId,
   inputElementId
 ) {
-  renderSearchCardList(
+  renderInputSearch(
     callback,
     searchContainerElementId,
     formElementId,
     inputElementId
   );
+
+  renderSpinnerLoading();
 
   let obj = query
     ? await getArtistSearch(currentPage, query)
@@ -688,8 +702,11 @@ function renderArtistList(obj) {
 }
 
 export async function renderArtistDetailsPage(elementId) {
+  renderSpinnerLoading();
   let obj = await getArtist(elementId);
   renderArtistDetails(obj);
+
+  renderArtworkCardListByArtist(obj.data.id)
 }
 
 function renderArtistDetails(obj) {
@@ -714,7 +731,7 @@ function renderArtistDetails(obj) {
     meta.innerHTML = obj.data.birth_date;
   }
   mainDiv.appendChild(meta);
-  renderArtworkCardListByArtist(obj.data.id);
+
   const description = document.createElement("p");
   description.classList.add("lead", "mb-4");
   description.innerHTML = obj.data.description;
@@ -724,6 +741,7 @@ function renderArtistDetails(obj) {
   mainDiv.appendChild(divider);
 
   const artworksDiv = document.createElement("div");
+  artworksDiv.id = ARTWORKS_BY_ARTIST_CONTAINER_ID;
 
   const artworksTitle = document.createElement("h4");
   artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
@@ -737,8 +755,12 @@ function renderArtistDetails(obj) {
 }
 
 export async function renderArtworkCardListByArtist(artist_id) {
+
+  renderSpinnerLoading(ARTWORKS_BY_ARTIST_CONTAINER_ID);
+
   let obj = await loadDataCardListSection(await getArtworksByArtist(artist_id));
   renderArtworkCardsByArtist(obj);
+
 }
 
 function renderArtworkCardsByArtist(data) {
@@ -807,7 +829,8 @@ function renderArtworkCardsByArtist(data) {
     html.appendChild(col);
   });
 
-  let container = document.getElementById("container");
+  let container = document.getElementById(ARTWORKS_BY_ARTIST_CONTAINER_ID);
+  container.innerHTML = "";
   container.appendChild(html);
 }
 
@@ -833,4 +856,18 @@ function renderBackButton() {
   let container = document.getElementById("container");
   container.innerHTML = "";
   container.appendChild(backButton);
+}
+
+function renderSpinnerLoading(parentId = "container") {
+  const divContainer = document.createElement("div");
+  divContainer.classList.add("d-flex", "justify-content-center");
+  const div = document.createElement("div");
+  div.classList.add("spinner-border", "text-light", "m-5");
+  div.style.width = "3rem";
+  div.style.height = "3rem";
+  div.setAttribute("role", "status");
+  divContainer.appendChild(div);
+  let container = document.getElementById(parentId);
+  container.innerHTML = "";
+  container.appendChild(divContainer);
 }
