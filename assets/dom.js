@@ -5,6 +5,7 @@ import {
   goToExhibitionDetails,
   goToArtists,
   goToArtistDetails,
+  nextPaginationSearch,
 } from "./controller.js";
 
 import {
@@ -36,7 +37,12 @@ import {
   getArtists,
   getArtist,
   getArtworksByArtist,
+  getArtworkSearch,
+  getExhibitionSearch,
+  getArtistSearch,
 } from "../API/api.js";
+
+const NO_RESULTS_TEXT = "No results found";
 
 function renderArtworkCards(data) {
   let html = document.createElement("div");
@@ -104,9 +110,9 @@ function renderArtworkCards(data) {
     html.appendChild(col);
   });
 
-  let container = document.getElementById("container");
-  container.innerHTML = "";
-  container.appendChild(html);
+  let containerCardList = document.getElementById("container");
+  containerCardList.innerHTML = "";
+  containerCardList.appendChild(html);
 }
 
 function renderPagination(
@@ -196,21 +202,85 @@ function createPaginationButton(
   return pageItem;
 }
 
-export async function renderArtworkCardListPage(currentPage) {
-  let obj = await loadDataCardListPage(
-    await getArtworks(currentPage),
-    artworkElementsPerPage
+export function renderSearchCardList(
+  callback,
+  searchContainerElementId,
+  formElementId,
+  inputElementId
+) {
+  const form = document.createElement("form");
+  form.classList.add("d-flex");
+  form.setAttribute("role", "search");
+  form.id = formElementId;
+
+  const input = document.createElement("input");
+  input.classList.add("form-control", "me-2");
+  input.type = "search";
+  input.placeholder = "Search";
+  input.setAttribute("aria-label", "Search");
+  input.id = inputElementId;
+
+  const button = document.createElement("button");
+  button.classList.add("btn", "btn-outline-success");
+  button.type = "submit";
+  button.textContent = "Search";
+
+  form.appendChild(input);
+  form.appendChild(button);
+
+  let containerForm = document.getElementById(searchContainerElementId);
+  containerForm.innerHTML = "";
+  containerForm.appendChild(form);
+
+  const initialPage = 1;
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const searchTerm = input.value;
+
+    callback(initialPage, searchTerm);
+  });
+}
+
+export async function renderArtworkCardListPage(
+  currentPage,
+  query,
+  callback,
+  searchContainerElementId,
+  formElementId,
+  inputElementId
+) {
+  renderSearchCardList(
+    callback,
+    searchContainerElementId,
+    formElementId,
+    inputElementId
   );
+
+  let obj = await loadDataCardListPage(
+    query
+      ? await getArtworkSearch(currentPage, query)
+      : await getArtworks(currentPage),
+    artworkElementsPerPage,
+    query ? true : false
+  );
+
   const totalPages = obj.pagination.total_pages;
 
-  renderArtworkCards(obj);
+  if (totalPages > 0) {
+    renderArtworkCards(obj);
 
-  renderPagination(
-    totalPages,
-    currentPage,
-    goToArtworks,
-    artWorkPaginationLimit
-  );
+    renderPagination(
+      totalPages,
+      currentPage,
+      query ? nextPaginationSearch : goToArtworks,
+      artWorkPaginationLimit
+    );
+  } else {
+    renderBackButton();
+    renderNoResultsMessage(NO_RESULTS_TEXT);
+  }
 }
 
 export async function renderArtworkCardDetailsPage(elementId) {
@@ -220,16 +290,8 @@ export async function renderArtworkCardDetailsPage(elementId) {
 }
 
 function renderArtworkCardDetails(obj) {
-  const backButton = document.createElement("button");
-  backButton.type = "button";
-  backButton.classList.add("btn", "btn-outline-light");
-  backButton.id = "backToListBtn";
-  backButton.textContent = "Back";
-
-  backButton.addEventListener("click", function () {
-    window.history.back();
-  });
-
+  renderBackButton();
+  
   const div = document.createElement("div");
   div.classList.add("pt-5", "my-5", "text-center");
 
@@ -252,10 +314,7 @@ function renderArtworkCardDetails(obj) {
   const meta = document.createElement("p");
   meta.classList.add("details-meta");
   meta.innerHTML =
-    obj.data.place_of_origin +
-    " - " +
-    obj.data.date_display +
-    " by";
+    obj.data.place_of_origin + " - " + obj.data.date_display + " by";
 
   for (let i = 0; i < obj.data.artist_ids.length; i++) {
     let button = document.createElement("button");
@@ -281,26 +340,45 @@ function renderArtworkCardDetails(obj) {
   div.appendChild(description);
 
   let container = document.getElementById("container");
-  container.innerHTML = "";
-  container.appendChild(backButton);
   container.appendChild(div);
 }
 
-export async function renderExhibitionCardListPage(currentPage) {
+export async function renderExhibitionCardListPage(
+  currentPage,
+  query,
+  callback,
+  searchContainerElementId,
+  formElementId,
+  inputElementId
+) {
+  renderSearchCardList(
+    callback,
+    searchContainerElementId,
+    formElementId,
+    inputElementId
+  );
+
   let obj = await loadDataCardListPage(
-    await getExhibitions(currentPage),
-    exhibitionElementsPerPage
+    query
+      ? await getExhibitionSearch(currentPage, query)
+      : await getExhibitions(currentPage),
+    exhibitionElementsPerPage,
+    query ? true : false
   );
   const totalPages = obj.pagination.total_pages;
+  if (totalPages > 0) {
+    renderExhibitionCards(obj);
 
-  renderExhibitionCards(obj);
-
-  renderPagination(
-    totalPages,
-    currentPage,
-    goToExhibitions,
-    exhibitionPaginationLimit
-  );
+    renderPagination(
+      totalPages,
+      currentPage,
+      query ? nextPaginationSearch : goToExhibitions,
+      exhibitionPaginationLimit
+    );
+  } else {
+    renderBackButton();
+    renderNoResultsMessage(NO_RESULTS_TEXT);
+  }
 }
 
 function renderExhibitionCards(data) {
@@ -380,16 +458,7 @@ export async function renderExhibitionCardDetailsPage(elementId) {
 }
 
 function renderExhibitionCardDetails(obj) {
-  const backButton = document.createElement("button");
-  backButton.type = "button";
-  backButton.classList.add("btn", "btn-outline-light");
-  backButton.id = "backToListBtn";
-  backButton.textContent = "Back";
-
-  backButton.addEventListener("click", function () {
-    window.history.back();
-  });
-
+  renderBackButton();
   const mainDiv = document.createElement("div");
   mainDiv.classList.add("pt-5", "my-5", "text-center");
 
@@ -424,7 +493,6 @@ function renderExhibitionCardDetails(obj) {
   mainDiv.appendChild(divider);
 
   const artworksDiv = document.createElement("div");
-  // artworksDiv.classList.add("pt-5", "my-5",);
 
   const artworksTitle = document.createElement("h4");
   artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
@@ -432,8 +500,6 @@ function renderExhibitionCardDetails(obj) {
   artworksDiv.appendChild(artworksTitle);
 
   let container = document.getElementById("container");
-  container.innerHTML = "";
-  container.appendChild(backButton);
   container.appendChild(mainDiv);
 
   container.appendChild(artworksDiv);
@@ -516,14 +582,39 @@ function renderArtworkCardsByExhibition(data) {
   container.appendChild(html);
 }
 
-export async function renderArtistListPage(currentPage) {
-  let obj = await getArtists(currentPage, artistElementsPerPage);
+export async function renderArtistListPage(
+  currentPage,
+  query,
+  callback,
+  searchContainerElementId,
+  formElementId,
+  inputElementId
+) {
+  renderSearchCardList(
+    callback,
+    searchContainerElementId,
+    formElementId,
+    inputElementId
+  );
 
+  let obj = query
+    ? await getArtistSearch(currentPage, query)
+    : await getArtists(currentPage, artistElementsPerPage);
   const totalPages = obj.pagination.total_pages;
 
-  renderArtistList(obj);
+  if (totalPages > 0) {
+    renderArtistList(obj);
 
-  renderPagination(totalPages, currentPage, goToArtists, artistPaginationLimit);
+    renderPagination(
+      totalPages,
+      currentPage,
+      query ? nextPaginationSearch : goToArtists,
+      artistPaginationLimit
+    );
+  } else {
+    renderBackButton();
+    renderNoResultsMessage(NO_RESULTS_TEXT);
+  }
 }
 
 function renderArtistList(obj) {
@@ -602,16 +693,7 @@ export async function renderArtistDetailsPage(elementId) {
 }
 
 function renderArtistDetails(obj) {
-  const backButton = document.createElement("button");
-  backButton.type = "button";
-  backButton.classList.add("btn", "btn-outline-light");
-  backButton.id = "backToListBtn";
-  backButton.textContent = "Back";
-
-  backButton.addEventListener("click", function () {
-    window.history.back();
-  });
-
+  renderBackButton();
   const mainDiv = document.createElement("div");
   mainDiv.classList.add("pt-5", "my-5", "text-center");
 
@@ -632,8 +714,6 @@ function renderArtistDetails(obj) {
     meta.innerHTML = obj.data.birth_date;
   }
   mainDiv.appendChild(meta);
-  //TODO
-  // renderArtworkCardListByExhibition(obj.data.artwork_ids);
   renderArtworkCardListByArtist(obj.data.id);
   const description = document.createElement("p");
   description.classList.add("lead", "mb-4");
@@ -644,7 +724,6 @@ function renderArtistDetails(obj) {
   mainDiv.appendChild(divider);
 
   const artworksDiv = document.createElement("div");
-  // artworksDiv.classList.add("pt-5", "my-5",);
 
   const artworksTitle = document.createElement("h4");
   artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
@@ -652,8 +731,6 @@ function renderArtistDetails(obj) {
   artworksDiv.appendChild(artworksTitle);
 
   let container = document.getElementById("container");
-  container.innerHTML = "";
-  container.appendChild(backButton);
   container.appendChild(mainDiv);
 
   container.appendChild(artworksDiv);
@@ -732,4 +809,28 @@ function renderArtworkCardsByArtist(data) {
 
   let container = document.getElementById("container");
   container.appendChild(html);
+}
+
+function renderNoResultsMessage(text) {
+  const paragraph = document.createElement("p");
+  paragraph.classList.add("h1", "text-center", "m-5");
+  paragraph.textContent = text;
+  let container = document.getElementById("container");
+  container.appendChild(paragraph);
+}
+
+function renderBackButton() {
+  const backButton = document.createElement("button");
+  backButton.type = "button";
+  backButton.classList.add("btn", "btn-outline-light", "me-5", "mb-5");
+  backButton.id = "backToListBtn";
+  backButton.textContent = "Back";
+
+  backButton.addEventListener("click", function () {
+    window.history.back();
+  });
+
+  let container = document.getElementById("container");
+  container.innerHTML = "";
+  container.appendChild(backButton);
 }

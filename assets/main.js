@@ -1,7 +1,7 @@
-import { initControllerListener } from "./controller.js";
+import { controllerListener } from "./controller.js";
 
 (function main(){
 
-  initControllerListener();
+  controllerListener();
 
 })();

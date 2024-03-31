@@ -1,17 +1,26 @@
-import {
-  getImageByArtwork,
-} from "./API/api.js";
+import { getImageByArtwork } from "./API/api.js";
 
-export async function loadDataCardListPage(obj, elementsPerPage) {
+const NO_IMAGE_PLACE_HOLDER_URL = "assets/media/No-Image-Placeholder.svg";
+
+export async function loadDataCardListPage(
+  obj,
+  elementsPerPage,
+  imageNullable = false
+) {
   let data = [];
   let currentData;
 
   for (const element of obj.data) {
     let img_url = await getImageByArtwork(obj, element.image_id);
 
-    if (!img_url) {
+    if (!img_url && !imageNullable) {
       continue;
-    } else {
+    } else if (!img_url && imageNullable) {
+      data.push({
+        data: element,
+        img_url: NO_IMAGE_PLACE_HOLDER_URL,
+      });
+    } else if (img_url) {
       data.push({
         data: element,
         img_url: img_url,
@@ -32,7 +41,6 @@ export async function loadDataCardListPage(obj, elementsPerPage) {
 }
 
 export async function loadDataCardDetails(obj) {
-
   let img_url = await getImageByArtwork(obj, obj.data.image_id);
   return {
     data: obj.data,

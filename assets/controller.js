@@ -4,63 +4,79 @@ import {
   renderExhibitionCardListPage,
   renderExhibitionCardDetailsPage,
   renderArtistListPage,
-  renderArtistDetailsPage
+  renderArtistDetailsPage,
 } from "./dom.js";
 
-export function initControllerListener() {
+import { searchContainerElementId as searchContainerElementIdArtwork, searchInputElementId as searchInputElementIdArtwork, searchformElementId as searchformElementIdArtwork} from "../models/artwork.js";
+
+import { searchContainerElementId as searchContainerElementIdExhibition, searchInputElementId as searchInputElementIdExhibition, searchformElementId as searchformElementIdExhibition } from "../models/exhibition.js";
+
+import { searchContainerElementId as searchContainerElementIdArtist, searchInputElementId as searchInputElementIdArtist, searchformElementId as searchformElementIdArtist } from "../models/artist.js";
+
+export function controllerListener() {
   document.addEventListener("DOMContentLoaded", async function () {
     const pathname = window.location.pathname;
     const params = new URLSearchParams(window.location.search);
     const currentPage = parseInt(params.get("page"));
     const elementId = parseInt(params.get("id"));
+    const query = params.get("q");
 
     switch (pathname) {
       case "/":
         break;
       case "/artworks.html":
-        if (currentPage) {
+
+        if (currentPage && !query) {
           await showArtworkCardListPage(currentPage);
         } else if (elementId) {
           await showArtworkDetails(elementId);
+        } else if (query) {
+          await showArtworkCardListPage(currentPage, query);
         }
         break;
       case "/exhibitions.html":
-        if (currentPage) {
+
+        if (currentPage && !query) {
           await showExhibitionCardListPage(currentPage);
         } else if (elementId) {
           await showExhibitionDetails(elementId);
+        } else if (query) {
+          await showExhibitionCardListPage(currentPage, query);
         }
         break;
 
       case "/artists.html":
-        if (currentPage) {
+
+        if (currentPage && !query) {
           await showArtistCardListPage(currentPage);
         } else if (elementId) {
           await showArtistDetails(elementId);
+        } else if (query) {
+          await showArtistCardListPage(currentPage, query);
         }
         break;
     }
   });
 }
 
-async function showArtworkCardListPage(currentPage) {
-  await renderArtworkCardListPage(currentPage);
+async function showArtworkCardListPage(currentPage, query = null) {
+  await renderArtworkCardListPage(currentPage, query, goToArtworkSearch,searchContainerElementIdArtwork, searchformElementIdArtwork,searchInputElementIdArtwork);
 }
 
 async function showArtworkDetails(elementId) {
   await renderArtworkCardDetailsPage(elementId);
 }
 
-async function showExhibitionCardListPage(currentPage) {
-  await renderExhibitionCardListPage(currentPage);
+async function showExhibitionCardListPage(currentPage, query = null) {
+  await renderExhibitionCardListPage(currentPage, query, goToExhibitionSearch,searchContainerElementIdExhibition, searchformElementIdExhibition,searchInputElementIdExhibition);
 }
 
 async function showExhibitionDetails(elementId) {
   await renderExhibitionCardDetailsPage(elementId);
 }
 
-async function showArtistCardListPage(currentPage) {
-  await renderArtistListPage(currentPage);
+async function showArtistCardListPage(currentPage, query = null) {
+  await renderArtistListPage(currentPage, query, goToArtistSearch,searchContainerElementIdArtist, searchformElementIdArtist,searchInputElementIdArtist);
 }
 
 async function showArtistDetails(elementId) {
@@ -89,4 +105,29 @@ export function goToArtists(currentPage) {
 
 export function goToArtistDetails(elementId) {
   window.location.href = `/artists.html?id=${elementId}`;
+}
+
+export function goToArtworkSearch(currentPage, query) {
+  window.location.href = `/artworks.html?q=${query}&page=${currentPage}`;
+}
+
+export function nextPaginationSearch(currentPage) {
+  let currentUrl = new URL(window.location.href);
+
+  let params = new URLSearchParams(currentUrl.search);
+
+  params.set("page", currentPage);
+
+  let updatedUrl =
+    currentUrl.origin + currentUrl.pathname + "?" + params.toString();
+
+  window.location.href = updatedUrl;
+}
+
+export function goToExhibitionSearch(currentPage, query) {
+  window.location.href = `/exhibitions.html?q=${query}&page=${currentPage}`;
+}
+
+export function goToArtistSearch(currentPage, query) {
+  window.location.href = `/artists.html?q=${query}&page=${currentPage}`;
 }

@@ -214,3 +214,87 @@ export async function getArtworksByArtist(artist_id) {
     return response;
   }
 }
+
+export async function getArtworkSearch(currentPage, query){
+  var limit = "limit=9";
+  const fields_url = "fields=id,title,image_id,artist_display,date_display";
+  const base_url = "https://api.artic.edu/api/v1/artworks";
+  const url =
+    base_url +
+    "/search?q=" +
+    query +
+    "&" +
+    "page=" +
+    currentPage +
+    "&" +
+    limit +
+    "&" +
+    fields_url;
+
+  let response = await getAPI({
+    url: url,
+    headers: headers,
+    model: Entity.Artwork,
+  });
+  if (!response) {
+    throw new Error("Error getArtworkSearch(): " + response);
+  } else {
+    return response;
+  }
+}
+
+export async function getExhibitionSearch(currentPage, query){
+  var limit = "limit=9";
+  const fields_url = "fields=id,title,image_id,short_description,status";
+  const base_url = "https://api.artic.edu/api/v1/exhibitions";
+  const url =
+    base_url +
+    "/search?q=" +
+    query +
+    "&" +
+    "page=" +
+    currentPage +
+    "&" +
+    limit +
+    "&" +
+    fields_url;
+
+  let response = await getAPI({
+    url: url,
+    headers: headers,
+    model: Entity.Exhibition,
+  });
+  if (!response) {
+    throw new Error("Error getExhibitionSearch(): " + response);
+  } else {
+    return response;
+  }
+}
+
+export async function getArtistSearch(currentPage, query){
+  var limit = "limit=27";
+  const fields_url = "fields=id,title,birth_date,death_date,updated_at,is_artist";
+  const base_url = "https://api.artic.edu/api/v1/artists";
+  const url =
+    base_url +
+    "/search?q=" +
+    query +
+    "&" +
+    "page=" +
+    currentPage +
+    "&" +
+    limit +
+    "&" +
+    fields_url;
+
+  let response = await getAPI({
+    url: url,
+    headers: headers,
+    model: Entity.Exhibition,
+  });
+  if (!response) {
+    throw new Error("Error getArtistSearch(): " + response);
+  } else {
+    return response;
+  }
+}
