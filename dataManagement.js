@@ -53,9 +53,10 @@ export async function loadDataCardListSection(obj) {
 
   for (const element of obj.data) {
     let img_url = await getImageByArtwork(obj, element.image_id);
+    
     data.push({
       data: element,
-      img_url: img_url,
+      img_url: img_url? img_url : NO_IMAGE_PLACE_HOLDER_URL,
     });
   }
 

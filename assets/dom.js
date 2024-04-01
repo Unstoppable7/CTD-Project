@@ -41,8 +41,11 @@ import {
   getExhibitionSearch,
   getArtistSearch,
 } from "../API/api.js";
+import { NavbarPageIndex } from "./util.js";
 
 const NO_RESULTS_TEXT = "No results found";
+const NO_ARTWORKS_BY_EXHIBITION = "This exhibition has no assigned artworks";
+const NO_ARTWORKS_BY_ARTIST = "This artist has no assigned artworks";
 const ARTWORKS_BY_EXHIBITION_CONTAINER_ID = "container-artworksByExhibition";
 const ARTWORKS_BY_ARTIST_CONTAINER_ID = "container-artworksByArtist";
 
@@ -82,7 +85,8 @@ function renderArtworkCards(data) {
     divContainer.classList.add(
       "d-flex",
       "justify-content-between",
-      "align-items-center"
+      "align-items-center",
+      "mt-4"
     );
 
     let buttonGroup = document.createElement("div");
@@ -90,15 +94,17 @@ function renderArtworkCards(data) {
 
     let button = document.createElement("button");
     button.type = "button";
-    button.classList.add("btn", "btn-sm", "btn-outline-secondary");
-    button.textContent = "View";
+    button.classList.add("btn", "btn-sm", "btn-primary");
+    button.textContent = "Details";
     button.addEventListener("click", () => {
       goToArtworkDetails(item.data.id);
     });
 
     let small = document.createElement("small");
-    small.classList.add("text-body-secondary");
-    small.textContent = `Created in ${item.data.date_display}`;
+    small.classList.add("text-body-secondary", "text-end");
+    small.textContent = item.data.date_display
+      ? `Created in ${item.data.date_display}`
+      : "";
 
     buttonGroup.appendChild(button);
     divContainer.appendChild(buttonGroup);
@@ -124,6 +130,7 @@ function renderPagination(
   paginationLimit
 ) {
   const paginationContainer = document.getElementById("pagination");
+  paginationContainer.classList.add("mt-5");
   paginationContainer.innerHTML = "";
 
   const nav = document.createElement("nav");
@@ -204,35 +211,28 @@ function createPaginationButton(
   return pageItem;
 }
 
-export function renderInputSearch(
-  callback,
-  searchContainerElementId,
-  formElementId,
-  inputElementId
-) {
+function renderInputSearch(callback, formElementId, inputElementId) {
+  const parentDiv = document.getElementById("navbar-linksContainer");
+
   const form = document.createElement("form");
   form.classList.add("d-flex");
   form.setAttribute("role", "search");
   form.id = formElementId;
+  parentDiv.appendChild(form);
 
   const input = document.createElement("input");
   input.classList.add("form-control", "me-2");
-  input.type = "search";
-  input.placeholder = "Search";
+  input.setAttribute("type", "search");
+  input.setAttribute("placeholder", "Search");
   input.setAttribute("aria-label", "Search");
   input.id = inputElementId;
+  form.appendChild(input);
 
   const button = document.createElement("button");
   button.classList.add("btn", "btn-outline-success");
-  button.type = "submit";
+  button.setAttribute("type", "submit");
   button.textContent = "Search";
-
-  form.appendChild(input);
   form.appendChild(button);
-
-  let containerForm = document.getElementById(searchContainerElementId);
-  containerForm.innerHTML = "";
-  containerForm.appendChild(form);
 
   const initialPage = 1;
 
@@ -245,17 +245,92 @@ export function renderInputSearch(
   });
 }
 
+export function renderNavBar(
+  activePage,
+  inputSearch = true,
+  callback,
+  formElementId,
+  inputElementId
+) {
+  const header = document.querySelector("header");
+  header.innerHTML = "";
+
+  const nav = document.createElement("nav");
+  nav.classList.add("navbar", "navbar-expand-lg", "bg-dark", "my-2");
+
+  const containerFluid = document.createElement("div");
+  containerFluid.classList.add("container-fluid");
+  nav.appendChild(containerFluid);
+
+  const brandLink = document.createElement("a");
+  brandLink.classList.add("navbar-brand");
+  brandLink.href = "/";
+  brandLink.textContent = "CTD Pre-Work";
+  containerFluid.appendChild(brandLink);
+
+  const togglerButton = document.createElement("button");
+  togglerButton.classList.add("navbar-toggler");
+  togglerButton.setAttribute("type", "button");
+  togglerButton.setAttribute("data-bs-toggle", "collapse");
+  togglerButton.setAttribute("data-bs-target", "#navbarSupportedContent");
+  togglerButton.setAttribute("aria-controls", "navbarSupportedContent");
+  togglerButton.setAttribute("aria-expanded", "false");
+  togglerButton.setAttribute("aria-label", "Toggle navigation");
+  containerFluid.appendChild(togglerButton);
+
+  const togglerIcon = document.createElement("span");
+  togglerIcon.classList.add("navbar-toggler-icon");
+  togglerButton.appendChild(togglerIcon);
+
+  const linksContainer = document.createElement("div");
+  linksContainer.classList.add("collapse", "navbar-collapse");
+  linksContainer.setAttribute("id", "navbarSupportedContent");
+  linksContainer.id = "navbar-linksContainer";
+  containerFluid.appendChild(linksContainer);
+
+  const linksList = document.createElement("ul");
+  linksList.classList.add("navbar-nav", "me-auto", "mb-2", "mb-lg-0");
+  linksContainer.appendChild(linksList);
+
+  const linkNames = ["Home", "Artworks", "Artists", "Exhibitions"];
+  const linkHrefs = [
+    "/",
+    "/artworks.html?page=1",
+    "/artists.html?page=1",
+    "/exhibitions.html?page=1",
+  ];
+  linkNames.forEach((name, index) => {
+    const listItem = document.createElement("li");
+    listItem.classList.add("nav-item");
+    const link = document.createElement("a");
+    link.classList.add("nav-link");
+    link.setAttribute("href", linkHrefs[index]);
+    link.textContent = name;
+    if (index === activePage) {
+      link.classList.add("active");
+      link.setAttribute("aria-current", "page");
+    }
+    listItem.appendChild(link);
+    linksList.appendChild(listItem);
+  });
+
+  header.appendChild(nav);
+  if (inputSearch) {
+    renderInputSearch(callback, formElementId, inputElementId);
+  }
+}
+
 export async function renderArtworkCardListPage(
   currentPage,
   query,
   callback,
-  searchContainerElementId,
   formElementId,
   inputElementId
 ) {
-  renderInputSearch(
+  renderNavBar(
+    NavbarPageIndex.Artwork,
+    true,
     callback,
-    searchContainerElementId,
     formElementId,
     inputElementId
   );
@@ -283,7 +358,9 @@ export async function renderArtworkCardListPage(
 }
 
 export async function renderArtworkCardDetailsPage(elementId) {
-
+  
+  renderNavBar(NavbarPageIndex.Artwork,false);
+  
   renderSpinnerLoading();
 
   renderArtworkCardDetails(
@@ -292,7 +369,6 @@ export async function renderArtworkCardDetailsPage(elementId) {
 }
 
 function renderArtworkCardDetails(obj) {
-
   renderBackButton();
 
   const div = document.createElement("div");
@@ -302,12 +378,20 @@ function renderArtworkCardDetails(obj) {
   innerContainer.classList.add("container", "px-5");
   div.appendChild(innerContainer);
 
-  const image = document.createElement("img");
-  image.src = obj.img_url;
-  image.classList.add("img-fluid", "border", "rounded-3", "shadow-lg", "mb-4");
-  image.alt = "Example image";
-  image.loading = "lazy";
-  innerContainer.appendChild(image);
+  if (obj.img_url) {
+    const image = document.createElement("img");
+    image.src = obj.img_url;
+    image.classList.add(
+      "img-fluid",
+      "border",
+      "rounded-3",
+      "shadow-lg",
+      "mb-4"
+    );
+    image.alt = "Example image";
+    image.loading = "lazy";
+    innerContainer.appendChild(image);
+  }
 
   const title = document.createElement("h1");
   title.classList.add("display-4", "fw-bold", "text-body-emphasis");
@@ -350,17 +434,17 @@ export async function renderExhibitionCardListPage(
   currentPage,
   query,
   callback,
-  searchContainerElementId,
   formElementId,
   inputElementId
 ) {
-  renderInputSearch(
+  renderNavBar(
+    NavbarPageIndex.Exhibition,
+    true,
     callback,
-    searchContainerElementId,
     formElementId,
     inputElementId
   );
-  
+
   renderSpinnerLoading();
 
   let obj = await loadDataCardListPage(
@@ -422,7 +506,8 @@ function renderExhibitionCards(data) {
     divContainer.classList.add(
       "d-flex",
       "justify-content-between",
-      "align-items-center"
+      "align-items-center",
+      "mt-4"
     );
 
     let buttonGroup = document.createElement("div");
@@ -430,8 +515,8 @@ function renderExhibitionCards(data) {
 
     let button = document.createElement("button");
     button.type = "button";
-    button.classList.add("btn", "btn-sm", "btn-outline-secondary");
-    button.textContent = "View";
+    button.classList.add("btn", "btn-sm", "btn-primary");
+    button.textContent = "Details";
     button.addEventListener("click", () => {
       goToExhibitionDetails(item.data.id);
     });
@@ -458,6 +543,7 @@ function renderExhibitionCards(data) {
 }
 
 export async function renderExhibitionCardDetailsPage(elementId) {
+  renderNavBar(NavbarPageIndex.Exhibition,false);
 
   renderSpinnerLoading();
 
@@ -481,46 +567,51 @@ function renderExhibitionCardDetails(obj) {
   image.alt = "Example image";
   image.loading = "lazy";
   innerContainer.appendChild(image);
-  
+
   const title = document.createElement("h1");
   title.classList.add("display-4", "fw-bold", "text-body-emphasis");
   title.textContent = obj.data.title;
   mainDiv.appendChild(title);
-  
-  const meta = document.createElement("p");
-  meta.classList.add("details-meta");
-  meta.innerHTML = obj.data.gallery_title + " Gallery";
-  mainDiv.appendChild(meta);
-  
+
+  if (obj.data.gallery_title) {
+    const meta = document.createElement("p");
+    meta.classList.add("details-meta");
+    meta.innerHTML = obj.data.gallery_title + " Gallery";
+    mainDiv.appendChild(meta);
+  }
+
   const description = document.createElement("p");
   description.classList.add("lead", "mb-4");
   description.innerHTML = obj.data.short_description;
   mainDiv.appendChild(description);
-  
+
   const divider = document.createElement("hr");
   mainDiv.appendChild(divider);
-  
+
   const artworksDiv = document.createElement("div");
-  
+
   const artworksTitle = document.createElement("h4");
   artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
   artworksTitle.textContent = "Artworks";
   artworksDiv.id = ARTWORKS_BY_EXHIBITION_CONTAINER_ID;
   artworksDiv.appendChild(artworksTitle);
-  
+
   let container = document.getElementById("container");
   container.appendChild(mainDiv);
   container.appendChild(artworksDiv);
 }
 
 export async function renderArtworkCardListByExhibition(artwork_ids) {
-
   renderSpinnerLoading(ARTWORKS_BY_EXHIBITION_CONTAINER_ID);
 
   let obj = await loadDataCardListSection(
     await getArtworksByExhibition(artwork_ids)
-  );
-  renderArtworkCardsByExhibition(obj);
+    );
+  if (obj.length > 0) {
+    renderArtworkCardsByExhibition(obj);
+  } else {
+    renderNoResultsMessage(NO_ARTWORKS_BY_EXHIBITION);
+  }
 }
 
 function renderArtworkCardsByExhibition(data) {
@@ -559,7 +650,8 @@ function renderArtworkCardsByExhibition(data) {
     divContainer.classList.add(
       "d-flex",
       "justify-content-between",
-      "align-items-center"
+      "align-items-center",
+      "mt-4"
     );
 
     let buttonGroup = document.createElement("div");
@@ -567,15 +659,17 @@ function renderArtworkCardsByExhibition(data) {
 
     let button = document.createElement("button");
     button.type = "button";
-    button.classList.add("btn", "btn-sm", "btn-outline-secondary");
-    button.textContent = "View";
+    button.classList.add("btn", "btn-sm", "btn-primary");
+    button.textContent = "Details";
     button.addEventListener("click", () => {
       goToArtworkDetails(item.data.id);
     });
 
     let small = document.createElement("small");
     small.classList.add("text-body-secondary");
-    small.textContent = `Created in ${item.data.date_display}`;
+    small.textContent = item.data.date_display
+      ? `Created in ${item.data.date_display}`
+      : "";
 
     buttonGroup.appendChild(button);
     divContainer.appendChild(buttonGroup);
@@ -598,13 +692,13 @@ export async function renderArtistListPage(
   currentPage,
   query,
   callback,
-  searchContainerElementId,
   formElementId,
   inputElementId
 ) {
-  renderInputSearch(
+  renderNavBar(
+    NavbarPageIndex.Artist,
+    true,
     callback,
-    searchContainerElementId,
     formElementId,
     inputElementId
   );
@@ -667,7 +761,8 @@ function renderArtistList(obj) {
     divContainer.classList.add(
       "d-flex",
       "justify-content-between",
-      "align-items-center"
+      "align-items-center",
+      "mt-4"
     );
 
     let buttonGroup = document.createElement("div");
@@ -675,8 +770,8 @@ function renderArtistList(obj) {
 
     let button = document.createElement("button");
     button.type = "button";
-    button.classList.add("btn", "btn-sm", "btn-outline-secondary");
-    button.textContent = "View";
+    button.classList.add("btn", "btn-sm", "btn-primary");
+    button.textContent = "Details";
     button.addEventListener("click", () => {
       goToArtistDetails(item.id);
     });
@@ -702,11 +797,13 @@ function renderArtistList(obj) {
 }
 
 export async function renderArtistDetailsPage(elementId) {
+  renderNavBar(NavbarPageIndex.Artist,false);
+
   renderSpinnerLoading();
   let obj = await getArtist(elementId);
   renderArtistDetails(obj);
 
-  renderArtworkCardListByArtist(obj.data.id)
+  renderArtworkCardListByArtist(obj.data.id);
 }
 
 function renderArtistDetails(obj) {
@@ -755,12 +852,15 @@ function renderArtistDetails(obj) {
 }
 
 export async function renderArtworkCardListByArtist(artist_id) {
-
   renderSpinnerLoading(ARTWORKS_BY_ARTIST_CONTAINER_ID);
 
   let obj = await loadDataCardListSection(await getArtworksByArtist(artist_id));
-  renderArtworkCardsByArtist(obj);
 
+  if (obj.length > 0) {
+    renderArtworkCardsByArtist(obj);
+  } else {
+    renderNoResultsMessage(NO_ARTWORKS_BY_ARTIST);
+  }
 }
 
 function renderArtworkCardsByArtist(data) {
@@ -799,7 +899,8 @@ function renderArtworkCardsByArtist(data) {
     divContainer.classList.add(
       "d-flex",
       "justify-content-between",
-      "align-items-center"
+      "align-items-center",
+      "mt-4"
     );
 
     let buttonGroup = document.createElement("div");
@@ -807,15 +908,17 @@ function renderArtworkCardsByArtist(data) {
 
     let button = document.createElement("button");
     button.type = "button";
-    button.classList.add("btn", "btn-sm", "btn-outline-secondary");
-    button.textContent = "View";
+    button.classList.add("btn", "btn-sm", "btn-primary");
+    button.textContent = "Details";
     button.addEventListener("click", () => {
       goToArtworkDetails(item.data.id);
     });
 
     let small = document.createElement("small");
     small.classList.add("text-body-secondary");
-    small.textContent = `Created in ${item.data.date_display}`;
+    small.textContent = item.data.date_display
+      ? `Created in ${item.data.date_display}`
+      : "";
 
     buttonGroup.appendChild(button);
     divContainer.appendChild(buttonGroup);
@@ -834,11 +937,11 @@ function renderArtworkCardsByArtist(data) {
   container.appendChild(html);
 }
 
-function renderNoResultsMessage(text) {
+function renderNoResultsMessage(text, parentID = "container") {
   const paragraph = document.createElement("p");
   paragraph.classList.add("h1", "text-center", "m-5");
   paragraph.textContent = text;
-  let container = document.getElementById("container");
+  let container = document.getElementById(parentID);
   container.appendChild(paragraph);
 }
 

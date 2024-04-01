@@ -5,13 +5,16 @@ import {
   renderExhibitionCardDetailsPage,
   renderArtistListPage,
   renderArtistDetailsPage,
+  renderNavBar
 } from "./dom.js";
 
-import { searchContainerElementId as searchContainerElementIdArtwork, searchInputElementId as searchInputElementIdArtwork, searchformElementId as searchformElementIdArtwork} from "../models/artwork.js";
+import { searchInputElementId as searchInputElementIdArtwork, searchformElementId as searchformElementIdArtwork} from "../models/artwork.js";
 
-import { searchContainerElementId as searchContainerElementIdExhibition, searchInputElementId as searchInputElementIdExhibition, searchformElementId as searchformElementIdExhibition } from "../models/exhibition.js";
+import { searchformElementId as searchformElementIdExhibition, searchInputElementId as searchInputElementIdExhibition} from "../models/exhibition.js";
 
-import { searchContainerElementId as searchContainerElementIdArtist, searchInputElementId as searchInputElementIdArtist, searchformElementId as searchformElementIdArtist } from "../models/artist.js";
+import { searchInputElementId as searchInputElementIdArtist, searchformElementId as searchformElementIdArtist } from "../models/artist.js";
+
+import { NavbarPageIndex } from "./util.js";
 
 export function controllerListener() {
   document.addEventListener("DOMContentLoaded", async function () {
@@ -20,9 +23,11 @@ export function controllerListener() {
     const currentPage = parseInt(params.get("page"));
     const elementId = parseInt(params.get("id"));
     const query = params.get("q");
+    
 
     switch (pathname) {
       case "/":
+        renderNavBar(NavbarPageIndex.Home,false);
         break;
       case "/artworks.html":
 
@@ -60,7 +65,7 @@ export function controllerListener() {
 }
 
 async function showArtworkCardListPage(currentPage, query = null) {
-  await renderArtworkCardListPage(currentPage, query, goToArtworkSearch,searchContainerElementIdArtwork, searchformElementIdArtwork,searchInputElementIdArtwork);
+  await renderArtworkCardListPage(currentPage, query, goToArtworkSearch, searchformElementIdArtwork,searchInputElementIdArtwork);
 }
 
 async function showArtworkDetails(elementId) {
@@ -68,7 +73,7 @@ async function showArtworkDetails(elementId) {
 }
 
 async function showExhibitionCardListPage(currentPage, query = null) {
-  await renderExhibitionCardListPage(currentPage, query, goToExhibitionSearch,searchContainerElementIdExhibition, searchformElementIdExhibition,searchInputElementIdExhibition);
+  await renderExhibitionCardListPage(currentPage, query, goToExhibitionSearch,searchformElementIdExhibition,searchInputElementIdExhibition);
 }
 
 async function showExhibitionDetails(elementId) {
@@ -76,7 +81,7 @@ async function showExhibitionDetails(elementId) {
 }
 
 async function showArtistCardListPage(currentPage, query = null) {
-  await renderArtistListPage(currentPage, query, goToArtistSearch,searchContainerElementIdArtist, searchformElementIdArtist,searchInputElementIdArtist);
+  await renderArtistListPage(currentPage, query, goToArtistSearch, searchformElementIdArtist,searchInputElementIdArtist);
 }
 
 async function showArtistDetails(elementId) {
