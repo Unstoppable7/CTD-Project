@@ -1,0 +1,13 @@
+.card-img-top {
+  width: 100%;
+  height: 30vw;
+  object-fit: cover;
+}
+.details-meta {
+  margin: 0rem;
+  padding: 0rem;
+  color: #727272;
+}
+p{
+  margin: 1em;
+}
