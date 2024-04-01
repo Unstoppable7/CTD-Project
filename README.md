@@ -26,5 +26,5 @@ This project is a website that allows users to explore artworks, artists, and ex
 
 ### Additional Notes
 - Ensure that you are accessing the root URL provided by Live Server in your web browser.
-- Additionally I have deployed the project in my personal web page, you can access with this link: [https://cristian-rosales.com/projects/ctd-pre-work/](https://cristian-rosales.com/projects/ctd-pre-work/).
 - Make sure you have an active internet connection so that the application can load and display data from the Art Institute of Chicago's API.
+- Additionally I have deployed the project in my personal web page, you can access with this link: [https://cristian-rosales.com/projects/ctd-pre-work/](https://cristian-rosales.com/projects/ctd-pre-work/).
