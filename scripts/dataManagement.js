@@ -1,4 +1,4 @@
-import { getImageByArtwork } from "./API/api.js";
+import { getImageByArtwork } from "./api.js";
 
 const NO_IMAGE_PLACE_HOLDER_URL = "assets/media/No-Image-Placeholder.svg";
 

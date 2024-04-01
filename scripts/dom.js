@@ -11,22 +11,22 @@ import {
 import {
   elementsPerPage as exhibitionElementsPerPage,
   paginationLimit as exhibitionPaginationLimit,
-} from "../models/exhibition.js";
+} from "./entities/exhibition.js";
 import {
   elementsPerPage as artworkElementsPerPage,
   paginationLimit as artWorkPaginationLimit,
-} from "../models/artwork.js";
+} from "./entities/artwork.js";
 
 import {
   elementsPerPage as artistElementsPerPage,
   paginationLimit as artistPaginationLimit,
-} from "../models/artist.js";
+} from "./entities/artist.js";
 
 import {
   loadDataCardListPage,
   loadDataCardDetails,
   loadDataCardListSection,
-} from "../dataManagement.js";
+} from "./dataManagement.js";
 
 import {
   getArtworks,
@@ -40,7 +40,7 @@ import {
   getArtworkSearch,
   getExhibitionSearch,
   getArtistSearch,
-} from "../API/api.js";
+} from "./api.js";
 import { NavbarPageIndex } from "./util.js";
 
 const NO_RESULTS_TEXT = "No results found";
@@ -400,8 +400,13 @@ function renderArtworkCardDetails(obj) {
 
   const meta = document.createElement("p");
   meta.classList.add("details-meta");
-  meta.innerHTML =
-    obj.data.place_of_origin + " - " + obj.data.date_display + " by";
+  let metaText = obj.data.place_of_origin ? obj.data.place_of_origin + " - " : "" + obj.data.date_display ? obj.data.date_display : "";
+
+  if(obj.data.artist_ids.length > 0){
+    metaText += " by";
+  }
+
+  meta.innerHTML = metaText;
 
   for (let i = 0; i < obj.data.artist_ids.length; i++) {
     let button = document.createElement("button");
@@ -590,11 +595,8 @@ function renderExhibitionCardDetails(obj) {
 
   const artworksDiv = document.createElement("div");
 
-  const artworksTitle = document.createElement("h4");
-  artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
-  artworksTitle.textContent = "Artworks";
+  
   artworksDiv.id = ARTWORKS_BY_EXHIBITION_CONTAINER_ID;
-  artworksDiv.appendChild(artworksTitle);
 
   let container = document.getElementById("container");
   container.appendChild(mainDiv);
@@ -682,9 +684,13 @@ function renderArtworkCardsByExhibition(data) {
     col.appendChild(card);
     html.appendChild(col);
   });
-
+  const artworksTitle = document.createElement("h2");
+  artworksTitle.classList.add("h2", "fw-bold", "text-body-emphasis", "my-4");
+  artworksTitle.textContent = "Artworks";
+  
   let container = document.getElementById(ARTWORKS_BY_EXHIBITION_CONTAINER_ID);
   container.innerHTML = "";
+  container.appendChild(artworksTitle);
   container.appendChild(html);
 }
 
@@ -823,7 +829,7 @@ function renderArtistDetails(obj) {
   const meta = document.createElement("p");
   meta.classList.add("details-meta");
   if (obj.data.death_date) {
-    meta.innerHTML = obj.data.birth_date + " - " + obj.data.death_date;
+    meta.innerHTML = obj.data.birth_date ? obj.data.birth_date : "Unknown date" + " - "  + obj.data.death_date;
   } else {
     meta.innerHTML = obj.data.birth_date;
   }
@@ -839,11 +845,6 @@ function renderArtistDetails(obj) {
 
   const artworksDiv = document.createElement("div");
   artworksDiv.id = ARTWORKS_BY_ARTIST_CONTAINER_ID;
-
-  const artworksTitle = document.createElement("h4");
-  artworksTitle.classList.add("display-8", "fw-bold", "text-body-emphasis");
-  artworksTitle.textContent = "Artworks";
-  artworksDiv.appendChild(artworksTitle);
 
   let container = document.getElementById("container");
   container.appendChild(mainDiv);
@@ -932,8 +933,13 @@ function renderArtworkCardsByArtist(data) {
     html.appendChild(col);
   });
 
+  const artworksTitle = document.createElement("h2");
+  artworksTitle.classList.add("h2", "fw-bold", "text-body-emphasis", "my-4");
+  artworksTitle.textContent = "Artworks";
+
   let container = document.getElementById(ARTWORKS_BY_ARTIST_CONTAINER_ID);
   container.innerHTML = "";
+  container.appendChild(artworksTitle);
   container.appendChild(html);
 }
 

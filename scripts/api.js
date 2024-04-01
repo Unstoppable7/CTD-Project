@@ -1,4 +1,4 @@
-import { Entity } from "../assets/util.js";
+import { Entity } from "./util.js";
 
 const headers = {
   headers: {

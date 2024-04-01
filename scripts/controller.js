@@ -8,11 +8,11 @@ import {
   renderNavBar
 } from "./dom.js";
 
-import { searchInputElementId as searchInputElementIdArtwork, searchformElementId as searchformElementIdArtwork} from "../models/artwork.js";
+import { searchInputElementId as searchInputElementIdArtwork, searchformElementId as searchformElementIdArtwork} from "./entities/artwork.js";
 
-import { searchformElementId as searchformElementIdExhibition, searchInputElementId as searchInputElementIdExhibition} from "../models/exhibition.js";
+import { searchformElementId as searchformElementIdExhibition, searchInputElementId as searchInputElementIdExhibition} from "./entities/exhibition.js";
 
-import { searchInputElementId as searchInputElementIdArtist, searchformElementId as searchformElementIdArtist } from "../models/artist.js";
+import { searchInputElementId as searchInputElementIdArtist, searchformElementId as searchformElementIdArtist } from "./entities/artist.js";
 
 import { NavbarPageIndex } from "./util.js";
 
