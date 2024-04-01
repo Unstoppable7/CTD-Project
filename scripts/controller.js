@@ -29,6 +29,10 @@ export function controllerListener() {
       case "/":
         renderNavBar(NavbarPageIndex.Home,false);
         break;
+
+      case "/index.html":
+        goToHome();
+        break;
       case "/artworks.html":
 
         if (currentPage && !query) {
@@ -114,6 +118,10 @@ export function goToArtistDetails(elementId) {
 
 export function goToArtworkSearch(currentPage, query) {
   window.location.href = `/artworks.html?q=${query}&page=${currentPage}`;
+}
+
+function goToHome(){
+  window.location.href = `/`;
 }
 
 export function nextPaginationSearch(currentPage) {

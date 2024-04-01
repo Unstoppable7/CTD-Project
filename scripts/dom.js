@@ -347,20 +347,25 @@ export async function renderArtworkCardListPage(
 
   const totalPages = obj.pagination.total_pages;
 
-  renderArtworkCards(obj);
+  if (totalPages > 0) {
+    renderArtworkCards(obj);
+  
+    renderPagination(
+      totalPages,
+      currentPage,
+      query ? nextPaginationSearch : goToArtworks,
+      artWorkPaginationLimit
+    );
+  }else{
+    renderBackButton();
+    renderNoResultsMessage(NO_RESULTS_TEXT);
+  }
 
-  renderPagination(
-    totalPages,
-    currentPage,
-    query ? nextPaginationSearch : goToArtworks,
-    artWorkPaginationLimit
-  );
 }
 
 export async function renderArtworkCardDetailsPage(elementId) {
-  
-  renderNavBar(NavbarPageIndex.Artwork,false);
-  
+  renderNavBar(NavbarPageIndex.Artwork, false);
+
   renderSpinnerLoading();
 
   renderArtworkCardDetails(
@@ -400,9 +405,13 @@ function renderArtworkCardDetails(obj) {
 
   const meta = document.createElement("p");
   meta.classList.add("details-meta");
-  let metaText = obj.data.place_of_origin ? obj.data.place_of_origin + " - " : "" + obj.data.date_display ? obj.data.date_display : "";
+  let metaText = obj.data.place_of_origin
+    ? obj.data.place_of_origin + " - "
+    : "" + obj.data.date_display
+    ? obj.data.date_display
+    : "";
 
-  if(obj.data.artist_ids.length > 0){
+  if (obj.data.artist_ids.length > 0) {
     metaText += " by";
   }
 
@@ -548,7 +557,7 @@ function renderExhibitionCards(data) {
 }
 
 export async function renderExhibitionCardDetailsPage(elementId) {
-  renderNavBar(NavbarPageIndex.Exhibition,false);
+  renderNavBar(NavbarPageIndex.Exhibition, false);
 
   renderSpinnerLoading();
 
@@ -566,13 +575,20 @@ function renderExhibitionCardDetails(obj) {
   innerContainer.classList.add("container", "px-5");
   mainDiv.appendChild(innerContainer);
 
-  const image = document.createElement("img");
-  image.src = obj.img_url;
-  image.classList.add("img-fluid", "border", "rounded-3", "shadow-lg", "mb-4");
-  image.alt = "Example image";
-  image.loading = "lazy";
-  innerContainer.appendChild(image);
-
+  if (obj.img_url) {
+    const image = document.createElement("img");
+    image.src = obj.img_url;
+    image.classList.add(
+      "img-fluid",
+      "border",
+      "rounded-3",
+      "shadow-lg",
+      "mb-4"
+    );
+    image.alt = "Example image";
+    image.loading = "lazy";
+    innerContainer.appendChild(image);
+  }
   const title = document.createElement("h1");
   title.classList.add("display-4", "fw-bold", "text-body-emphasis");
   title.textContent = obj.data.title;
@@ -595,7 +611,6 @@ function renderExhibitionCardDetails(obj) {
 
   const artworksDiv = document.createElement("div");
 
-  
   artworksDiv.id = ARTWORKS_BY_EXHIBITION_CONTAINER_ID;
 
   let container = document.getElementById("container");
@@ -608,7 +623,7 @@ export async function renderArtworkCardListByExhibition(artwork_ids) {
 
   let obj = await loadDataCardListSection(
     await getArtworksByExhibition(artwork_ids)
-    );
+  );
   if (obj.length > 0) {
     renderArtworkCardsByExhibition(obj);
   } else {
@@ -687,7 +702,7 @@ function renderArtworkCardsByExhibition(data) {
   const artworksTitle = document.createElement("h2");
   artworksTitle.classList.add("h2", "fw-bold", "text-body-emphasis", "my-4");
   artworksTitle.textContent = "Artworks";
-  
+
   let container = document.getElementById(ARTWORKS_BY_EXHIBITION_CONTAINER_ID);
   container.innerHTML = "";
   container.appendChild(artworksTitle);
@@ -803,7 +818,7 @@ function renderArtistList(obj) {
 }
 
 export async function renderArtistDetailsPage(elementId) {
-  renderNavBar(NavbarPageIndex.Artist,false);
+  renderNavBar(NavbarPageIndex.Artist, false);
 
   renderSpinnerLoading();
   let obj = await getArtist(elementId);
@@ -829,7 +844,9 @@ function renderArtistDetails(obj) {
   const meta = document.createElement("p");
   meta.classList.add("details-meta");
   if (obj.data.death_date) {
-    meta.innerHTML = obj.data.birth_date ? obj.data.birth_date : "Unknown date" + " - "  + obj.data.death_date;
+    meta.innerHTML = obj.data.birth_date
+      ? obj.data.birth_date
+      : "Unknown date" + " - " + obj.data.death_date;
   } else {
     meta.innerHTML = obj.data.birth_date;
   }
